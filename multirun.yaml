@@ -1,0 +1,209 @@
+hydra:
+  run:
+    dir: .
+  sweep:
+    dir: .
+    subdir: .
+  launcher:
+    _target_: hydra._internal.core_plugins.basic_launcher.BasicLauncher
+  sweeper:
+    _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
+    max_batch_size: null
+    params: null
+  help:
+    app_name: ${hydra.job.name}
+    header: '${hydra.help.app_name} is powered by Hydra.
+
+      '
+    footer: 'Powered by Hydra (https://hydra.cc)
+
+      Use --hydra-help to view Hydra specific help
+
+      '
+    template: '${hydra.help.header}
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (group=option)
+
+
+      $APP_CONFIG_GROUPS
+
+
+      == Config ==
+
+      Override anything in the config (foo.bar=value)
+
+
+      $CONFIG
+
+
+      ${hydra.help.footer}
+
+      '
+  hydra_help:
+    template: 'Hydra (${hydra.runtime.version})
+
+      See https://hydra.cc for more info.
+
+
+      == Flags ==
+
+      $FLAGS_HELP
+
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (For example, append hydra/job_logging=disabled
+      to command line)
+
+
+      $HYDRA_CONFIG_GROUPS
+
+
+      Use ''--cfg hydra'' to Show the Hydra config.
+
+      '
+    hydra_help: ???
+  hydra_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][HYDRA] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+    root:
+      level: INFO
+      handlers:
+      - console
+    loggers:
+      logging_example:
+        level: DEBUG
+    disable_existing_loggers: false
+  job_logging:
+    version: 1
+    root:
+      level: ERROR
+    disable_existing_loggers: true
+  env: {}
+  mode: MULTIRUN
+  searchpath: []
+  callbacks: {}
+  output_subdir: null
+  overrides:
+    hydra:
+    - hydra.mode=MULTIRUN
+    task:
+    - dataset=single
+    - single.use_id=true
+    - single.id=ET096_R1_Lib02
+    - single.pdb_id=ET096
+    - single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL
+    - cv_scheme=fold_random_5
+    - kernel=kermut
+  job:
+    name: supervised
+    chdir: false
+    override_dirname: cv_scheme=fold_random_5,dataset=single,kernel=kermut,single.id=ET096_R1_Lib02,single.pdb_id=ET096,single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL,single.use_id=true
+    id: ???
+    num: ???
+    config_name: supervised
+    env_set: {}
+    env_copy: []
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: []
+  runtime:
+    version: 1.3.2
+    version_base: '1.3'
+    cwd: /home/cchiajt-bii/kermut
+    config_sources:
+    - path: hydra.conf
+      schema: pkg
+      provider: hydra
+    - path: /home/cchiajt-bii/kermut/kermut/hydra_configs
+      schema: file
+      provider: main
+    - path: ''
+      schema: structured
+      provider: schema
+    output_dir: ???
+    choices:
+      data: paths_mod
+      data/embedding: esm2_mod
+      kernel: kermut
+      hydra/env: default
+      hydra/callbacks: null
+      hydra/job_logging: disabled
+      hydra/hydra_logging: default
+      hydra/hydra_help: default
+      hydra/help: default
+      hydra/sweeper: basic
+      hydra/launcher: basic
+      hydra/output: default
+  verbose: false
+kernel:
+  name: kermut
+  composition: weighted_sum
+  structure_kernel:
+    _target_: kermut.kernels.StructureKernel
+    use_site_comparison: true
+    use_mutation_comparison: true
+    use_distance_comparison: true
+    h_lengthscale: 1.0
+    d_lengthscale: 1.0
+    p_lengthscale: 1.0
+  sequence_kernel:
+    _target_: kermut.kernels.SequenceKernel
+    kernel_type: RBF
+  use_structure_kernel: true
+  use_zero_shot: true
+  zero_shot_method: ESM2/650M
+  use_sequence_kernel: true
+  embedding_type: ESM2
+  embedding_dim: 1280
+  noise_prior_scale: 0.1
+  use_prior: true
+data:
+  embedding:
+    model_path: models/esm2_t33_650M_UR50D.pt
+    mode: mixed
+    toks_per_batch: 16384
+  data_dir: data
+  paths:
+    reference_file: data/DMS_substitutions.csv
+    DMS_input_folder: ${data.data_dir}/cv_folds
+    conditional_probs: ${data.data_dir}/conditional_probs/ProteinMPNN
+    raw_conditional_probs: ${data.data_dir}/conditional_probs/raw_ProteinMPNN_outputs
+    embeddings: ${data.data_dir}/embeddings/substitutions/ESM2
+    pdbs: ${data.data_dir}/structures/pdbs
+    coords: ${data.data_dir}/structures/coords
+    zero_shot: ${data.data_dir}/zero_shot_fitness_predictions
+    output_folder: outputs
+    calibration_metrics: results/calibration_metrics
+    merged_scores: results/merged_scores
+    processed_scores: results/processed_scores
+  test_index: -1
+  standardize: true
+  sequence_col: mutated_sequence
+  target_col: DMS_score
+dataset: single
+cv_scheme: fold_random_5
+single:
+  id: ET096_R1_Lib02
+  pdb_id: ET096
+  use_id: true
+  target_seq: MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL
+seed: 2024
+overwrite: false
+use_gpu: true
+progress_bar: true
+optim:
+  n_steps: 150
+  lr: 0.1
+  progress_bar: false

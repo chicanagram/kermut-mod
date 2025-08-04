@@ -31,10 +31,7 @@ def _load_embeddings(cfg: DictConfig, df: pd.DataFrame, DMS_id: str) -> Union[to
     if not cfg.kernel.use_sequence_kernel:
         return None
 
-    if cfg.cv_scheme in ["fold_rand_multiples", "domain"]:
-        embedding_path = Path(cfg.data.paths.embeddings_multiples) / f"{DMS_id}.h5"
-    else:
-        embedding_path = Path(cfg.data.paths.embeddings_singles) / f"{DMS_id}.h5"
+    embedding_path = Path(cfg.data.paths.embeddings) / f"{DMS_id}.h5"
 
     if not embedding_path.exists():
         raise FileNotFoundError(f"Embeddings not found at {embedding_path}")
@@ -75,7 +72,7 @@ def _tokenize_data(cfg: DictConfig, df: pd.DataFrame) -> torch.Tensor:
     return x_toks
 
 
-def prepare_GP_inputs(
+def prepare_GP_inputs_mod(
     cfg: DictConfig, DMS_id: str
 ) -> Tuple[pd.DataFrame, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     df = pd.read_csv(Path(cfg.data.paths.DMS_input_folder) / f"{DMS_id}.csv")

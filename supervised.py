@@ -6,8 +6,8 @@ import torch
 from omegaconf import DictConfig
 
 from kermut.data import (
-    filter_datasets,
-    prepare_GP_inputs,
+    filter_datasets_mod,
+    prepare_GP_inputs_mod,
     prepare_GP_kwargs,
     split_inputs,
     standardize,
@@ -17,7 +17,7 @@ from kermut.gp import instantiate_gp, optimize_gp, predict
 
 def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
     try:
-        df, y, x_toks, x_embed, x_zero_shot = prepare_GP_inputs(cfg, DMS_id)
+        df, y, x_toks, x_embed, x_zero_shot = prepare_GP_inputs_mod(cfg, DMS_id)
         gp_inputs = prepare_GP_kwargs(cfg, DMS_id, target_seq)
 
         df_out = df[["mutations"]].copy()
@@ -88,10 +88,10 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
 @hydra.main(
     version_base=None,
     config_path="kermut/hydra_configs",
-    config_name="benchmark",
+    config_name="supervised",
 )
 def main(cfg: DictConfig) -> None:
-    df_ref = filter_datasets(cfg)
+    df_ref = filter_datasets_mod(cfg)
     if len(df_ref) == 0:
         print("All results exist.")
         return

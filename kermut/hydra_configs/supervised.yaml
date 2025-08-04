@@ -1,6 +1,6 @@
 defaults:
   - kernel: kermut
-  - data: paths
+  - data: paths_mod
   - _self_
   - override hydra/job_logging: disabled
 
@@ -8,7 +8,9 @@ dataset: ???
 cv_scheme: null
 single:
   id: null
+  pdb_id: null
   use_id: false
+  target_seq: null
 
 seed: 2024
 overwrite: false

@@ -4,9 +4,9 @@
 protein_mpnn_dir=$PROTEINMPNN_DIR
 
 # Majority of assays
-DATASET=TCRG1_MOUSE
-path_to_PDB="data/structures/pdbs/${DATASET}.pdb"
-output_dir="data/conditional_probs/raw_ProteinMPNN_outputs/${DATASET}/proteinmpnn"
+PDB=${PDB:-BLAT_ECOLX}
+path_to_PDB="data/structures/pdbs/${PDB}.pdb"
+output_dir="data/conditional_probs/raw_ProteinMPNN_outputs/${PDB}/proteinmpnn"
 
 if [ ! -d $output_dir ]
 then

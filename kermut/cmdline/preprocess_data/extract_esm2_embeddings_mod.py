@@ -13,17 +13,14 @@ from tqdm import tqdm
 
 
 def _filter_datasets(cfg: DictConfig, embedding_dir: Path) -> pd.DataFrame:
-    df_ref = pd.read_csv(cfg.data.paths.reference_file)
     match cfg.dataset:
         case "all":
+            df_ref = pd.read_csv(cfg.data.paths.reference_file)
             if cfg.data.embedding.mode == "multiples":
                 df_ref = df_ref[df_ref["includes_multiple_mutants"]]
                 df_ref = df_ref[df_ref["DMS_total_number_mutants"] < 7500]
         case "single":
-            if cfg.single.use_id:
-                df_ref = df_ref[df_ref["DMS_id"] == cfg.single.id]
-            else:
-                df_ref = df_ref.iloc[[cfg.single.id]]
+            df_ref = pd.DataFrame({'DMS_id':[cfg.single.id], 'UniProt_ID':[cfg.single.pdb_id], 'target_seq':[cfg.single.target_seq]})
         case _:
             raise ValueError(f"Invalid dataset: {cfg.dataset}")
 
@@ -40,20 +37,20 @@ def _filter_datasets(cfg: DictConfig, embedding_dir: Path) -> pd.DataFrame:
 
 @hydra.main(
     version_base=None,
-    # config_path="../hydra_configs",
     config_path="../../hydra_configs",
-    config_name="benchmark",
+    config_name="supervised",
 )
 def extract_esm2_embeddings(cfg: DictConfig) -> None:
     match cfg.data.embedding.mode:
         case "singles":
             embedding_dir = Path(cfg.data.paths.embeddings_singles)
             DMS_dir = Path(cfg.data.paths.DMS_input_folder)
-            # DMS_dir = Path(cfg.data.paths.DMS_input_folder) / "cv_folds_singles_substitutions"
         case "multiples":
             embedding_dir = Path(cfg.data.paths.embeddings_multiples)
             DMS_dir = Path(cfg.data.paths.DMS_input_folder)
-            # DMS_dir = Path(cfg.data.paths.DMS_input_folder) / "cv_folds_multiples_substitutions"
+        case "mixed":
+            embedding_dir = Path(cfg.data.paths.embeddings)
+            DMS_dir = Path(cfg.data.paths.DMS_input_folder)
         case _:
             raise ValueError(f"Invalid mode: {cfg.data.embedding.mode}")
 

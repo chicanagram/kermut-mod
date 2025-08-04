@@ -26,16 +26,12 @@ def _label_row(row, sequence, token_probs, alphabet, offset_idx):
 
 
 def _filter_datasets(cfg: DictConfig) -> pd.DataFrame:
-    df_ref = pd.read_csv(cfg.data.paths.reference_file)
     zero_shot_dir = Path(cfg.data.paths.zero_shot) / "ESM2" / "650M"
     match cfg.dataset:
         case "all":
-            pass
+            df_ref = pd.read_csv(cfg.data.paths.reference_file)
         case "single":
-            if cfg.single.use_id:
-                df_ref = df_ref[df_ref["DMS_id"] == cfg.single.id]
-            else:
-                df_ref = df_ref.iloc[[cfg.single.id]]
+            df_ref = pd.DataFrame({'DMS_id':[cfg.single.id], 'UniProt_ID':[cfg.single.pdb_id], 'target_seq':[cfg.single.target_seq]})
         case _:
             raise ValueError(f"Invalid dataset: {cfg.dataset}")
 
@@ -53,8 +49,7 @@ def _filter_datasets(cfg: DictConfig) -> pd.DataFrame:
 @hydra.main(
     version_base=None,
     config_path="../../hydra_configs",
-    # config_path="../hydra_configs",
-    config_name="benchmark",
+    config_name="supervised",
 )
 def extract_esm2_zero_shots(cfg: DictConfig) -> None:
     df_ref = _filter_datasets(cfg)
@@ -77,16 +72,7 @@ def extract_esm2_zero_shots(cfg: DictConfig) -> None:
     for i, DMS_id in tqdm(enumerate(df_ref["DMS_id"])):
         print(f"--- Computing zero-shots for {DMS_id} ({i+1}/{len(df_ref)}) ---")
         df_ref_dms = df_ref.loc[df_ref["DMS_id"] == DMS_id].iloc[0]
-        if (
-            df_ref_dms["includes_multiple_mutants"]
-            and df_ref_dms["DMS_total_number_mutants"] <= 7500
-        ):
-            file_in = file_in = DMS_dir / f"{DMS_id}.csv"
-            # file_in = DMS_dir / "cv_folds_multiples_substitutions" / f"{DMS_id}.csv"
-        else:
-            file_in = file_in = DMS_dir / f"{DMS_id}.csv"
-            # file_in = DMS_dir / "cv_folds_singles_substitutions" / f"{DMS_id}.csv"
-
+        file_in = DMS_dir / f"{DMS_id}.csv"
         df = pd.read_csv(file_in)
 
         batch_converter = alphabet.get_batch_converter()

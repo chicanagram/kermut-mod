@@ -11,25 +11,20 @@ from tqdm import tqdm
 @hydra.main(
     version_base=None,
     config_path="../../hydra_configs",
-    # config_path="../hydra_configs",
-    config_name="benchmark",
+    config_name="supervised",
 )
 def extract_3d_coords(cfg: DictConfig) -> None:
     """Extracts the coordinates of the alpha carbons for all proteins in the ProteinGym benchmark"""
 
-    df_ref = pd.read_csv(Path(cfg.data.paths.reference_file))
     pdb_dir = Path(cfg.data.paths.pdbs)
     distance_dir = Path(cfg.data.paths.coords)
     distance_dir.mkdir(exist_ok=True, parents=True)
 
     match cfg.dataset:
         case "single":
-            if cfg.single.use_id:
-                df_ref = df_ref[df_ref["DMS_id"] == cfg.single.id]
-            else:
-                df_ref = df_ref.iloc[[cfg.single.id]]
+            df_ref = pd.DataFrame({'DMS_id':[cfg.single.id], 'UniProt_ID':[cfg.single.pdb_id], 'target_seq':[cfg.single.target_seq]})
         case "all":
-            pass
+            df_ref = pd.read_csv(Path(cfg.data.paths.reference_file))
         case _:
             raise ValueError("Invalid dataset argument. Must be 'single' or 'all'.")
 

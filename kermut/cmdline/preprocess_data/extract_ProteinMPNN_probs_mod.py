@@ -7,16 +7,12 @@ from omegaconf import DictConfig
 
 
 def _filter_datasets(cfg: DictConfig) -> pd.DataFrame:
-    df_ref = pd.read_csv(cfg.data.paths.reference_file)
     probs_dir = Path(cfg.data.paths.conditional_probs)
     match cfg.dataset:
         case "all":
-            pass
+            df_ref = pd.read_csv(cfg.data.paths.reference_file)
         case "single":
-            if cfg.single.use_id:
-                df_ref = df_ref[df_ref["DMS_id"] == cfg.single.id]
-            else:
-                df_ref = pd.DataFrame({'DMS_id':[cfg.single.id], 'UniProt_ID':[cfg.single.pdb_id], 'target_seq':[cfg.single.target_seq]})
+            df_ref = pd.DataFrame({'DMS_id':[cfg.single.id], 'UniProt_ID':[cfg.single.pdb_id], 'target_seq':[cfg.single.target_seq]})
         case _:
             raise ValueError(f"Invalid dataset: {cfg.dataset}")
 
@@ -34,8 +30,7 @@ def _filter_datasets(cfg: DictConfig) -> pd.DataFrame:
 @hydra.main(
     version_base=None,
     config_path="../../hydra_configs",
-    # config_path="../hydra_configs",
-    config_name="benchmark",
+    config_name="supervised",
 )
 def extract_ProteinMPNN_probs(cfg: DictConfig) -> None:
     df_ref = _filter_datasets(cfg)
