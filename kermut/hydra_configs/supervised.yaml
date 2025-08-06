@@ -11,6 +11,8 @@ single:
   pdb_id: null
   use_id: false
   target_seq: null
+target_cols: null
+target_col_tags: null
 
 seed: 2024
 overwrite: false

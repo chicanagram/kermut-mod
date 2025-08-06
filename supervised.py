@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import hydra
@@ -26,7 +27,7 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
         unique_folds = (
             df[cfg.cv_scheme].unique() if cfg.data.test_index == -1 else [cfg.data.test_index]
         )
-        for test_fold in unique_folds:
+        for i, test_fold in enumerate(unique_folds):
             torch.manual_seed(cfg.seed)
             np.random.seed(cfg.seed)
 
@@ -61,6 +62,15 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
                 progress_bar=cfg.optim.progress_bar,
             )
 
+            # save model
+            if i==0:
+                kermut_model_dir = f'./models/kermut/{DMS_id}'
+                os.makedirs(kermut_model_dir, exist_ok=True)
+                print(f'Created model directory: {kermut_model_dir}')
+            model_fpath = f'{kermut_model_dir}/gp_{cfg.data.target_col_tag}_{i}.pth'
+            torch.save(gp.state_dict(), model_fpath)
+            print(f'Saved model trained from test fold {i}: {model_fpath}')
+
             df_out = predict(
                 gp=gp,
                 likelihood=likelihood,
@@ -75,7 +85,7 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
         print(f"Spearman: {spearman:.3f} (DMS ID: {DMS_id})")
 
         out_path = (
-            Path(cfg.data.paths.output_folder) / cfg.cv_scheme / cfg.kernel.name / f"{DMS_id}.csv"
+            Path(cfg.data.paths.output_folder) / cfg.cv_scheme / cfg.kernel.name / f"{DMS_id}_{cfg.data.target_col_tag}.csv"
         )
         out_path.parent.mkdir(parents=True, exist_ok=True)
         df_out.to_csv(out_path, index=False)
@@ -90,6 +100,7 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
     config_path="kermut/hydra_configs",
     config_name="supervised",
 )
+
 def main(cfg: DictConfig) -> None:
     df_ref = filter_datasets_mod(cfg)
     if len(df_ref) == 0:
@@ -99,7 +110,6 @@ def main(cfg: DictConfig) -> None:
     for i, (DMS_id, target_seq) in enumerate(df_ref.itertuples(index=False)):
         print(f"--- ({i+1}/{len(df_ref)}) {DMS_id} ---", flush=True)
         _evaluate_single_dms(cfg, DMS_id, target_seq)
-
 
 if __name__ == "__main__":
     main()

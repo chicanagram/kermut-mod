@@ -19,5 +19,6 @@ paths:
 
 test_index: -1
 standardize: true
-sequence_col: mutated_sequence
-target_col: DMS_score
+sequence_col: sequence
+target_col: null
+target_col_tag: null

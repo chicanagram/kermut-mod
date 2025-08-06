@@ -74,7 +74,7 @@ def extract_esm2_embeddings(cfg: DictConfig) -> None:
         df = pd.read_csv(DMS_dir / f"{DMS_id}.csv")
 
         mutants = df["mutations"].tolist()
-        sequences = df["mutated_sequence"].tolist()
+        sequences = df["sequence"].tolist()
         batched_dataset = FastaBatchedDataset(sequence_strs=sequences, sequence_labels=mutants)
 
         batches = batched_dataset.get_batch_indices(
