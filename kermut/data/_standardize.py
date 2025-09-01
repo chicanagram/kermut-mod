@@ -9,3 +9,10 @@ def standardize(y_train: torch.Tensor, y_test: torch.Tensor) -> Tuple[torch.Tens
     y_train = (y_train - mean) / std
     y_test = (y_test - mean) / std
     return y_train, y_test
+
+def standardize_mod(y_train: torch.Tensor, y_test: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    mean = y_train.mean()
+    std = y_train.std()
+    y_train = (y_train - mean) / std
+    y_test = (y_test - mean) / std
+    return y_train, y_test, mean.item(), std.item()

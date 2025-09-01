@@ -54,6 +54,7 @@ def _load_embeddings(cfg: DictConfig, df: pd.DataFrame, DMS_id: str) -> Union[to
         embeddings = embeddings.mean(dim=1)
 
     # Keep entries that are in the dataset
+    print('len(mutants):', len(mutants))
     keep = [x in df["mutations"].tolist() for x in mutants]
     embeddings = embeddings[keep]
     mutants = np.array(mutants)[keep]
@@ -76,11 +77,18 @@ def prepare_GP_inputs_mod(
     cfg: DictConfig, DMS_id: str
 ) -> Tuple[pd.DataFrame, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     df = pd.read_csv(Path(cfg.data.paths.DMS_input_folder) / f"{DMS_id}.csv")
-
-    y = torch.tensor(df[cfg.data.target_col].values, dtype=torch.float32)
+    print('len(df):', len(df))
+    if cfg.data.target_col in df:
+        y = torch.tensor(df[cfg.data.target_col].values, dtype=torch.float32)
+        print('len(y):', len(y))
+    else:
+        y = None
     x_toks = _tokenize_data(cfg, df)
+    print('len(x_toks):', len(x_toks)) 
     x_zero_shot = _load_zero_shot(cfg, df, DMS_id)
+    print('len(x_zero_shot):', len(x_zero_shot))
     x_embedding = _load_embeddings(cfg, df, DMS_id)
+    print('len(x_embedding):', len(x_embedding))
 
     if cfg.use_gpu and torch.cuda.is_available():
         x_toks = x_toks.cuda()

@@ -20,6 +20,7 @@ data/conditional_probs/raw_ProteinMPNN_outputs/*
 # Ignore predictions but keep directories
 results/predictions/**/*.csv
 results/predictions_old_split/**/*.csv
+models/kermut/
 
 # Keep summarized results
 !results/summary/**/*.csv

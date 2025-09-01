@@ -11,7 +11,7 @@ from kermut.data import (
     prepare_GP_inputs_mod,
     prepare_GP_kwargs,
     split_inputs,
-    standardize,
+    standardize_mod,
 )
 from kermut.gp import instantiate_gp, optimize_gp, predict
 
@@ -35,8 +35,8 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
             test_idx = (df[cfg.cv_scheme] == test_fold).tolist()
 
             y_train, y_test = split_inputs(train_idx, test_idx, y)
-            y_train, y_test = (
-                standardize(y_train, y_test) if cfg.data.standardize else (y_train, y_test)
+            y_train, y_test, mean_train, std_train = (
+                standardize_mod(y_train, y_test) if cfg.data.standardize else (y_train, y_test)
             )
 
             x_toks_train, x_toks_test = split_inputs(train_idx, test_idx, x_toks)
@@ -80,6 +80,13 @@ def _evaluate_single_dms(cfg: DictConfig, DMS_id: str, target_seq: str) -> None:
                 test_idx=test_idx,
                 df_out=df_out,
             )
+
+            # unstandardize predicted outputs
+            df_out.loc[test_idx, 'y_pred'] = df_out.loc[test_idx, 'y_pred'].to_numpy()*std_train + mean_train
+            df_out.loc[test_idx, 'y_var'] = df_out.loc[test_idx, 'y_var'].to_numpy()*std_train
+
+        df_out.loc[:,'y'] = y.detach().cpu().numpy()
+        df_out[[c for c in df_out.columns if c!='mutations']] = df_out[[c for c in df_out.columns if c!='mutations']].round(4)
 
         spearman = df_out["y"].corr(df_out["y_pred"], "spearman")
         print(f"Spearman: {spearman:.3f} (DMS ID: {DMS_id})")

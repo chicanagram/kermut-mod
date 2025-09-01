@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 
 def _label_row(row, sequence, token_probs, alphabet, offset_idx):
-    mutations = row.split(":")
+    mutations = row.split("+")
     score = 0
     for mutation in mutations:
         wt, idx, mt = mutation[0], int(mutation[1:-1]) - offset_idx, mutation[-1]
