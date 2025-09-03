@@ -6,11 +6,12 @@
 # -------- USER-DEFINED VARIABLES --------
 # parameters
 overwrite_current_files=false
-run_feature_extraction=true
-run_model_eval=true
+run_feature_extraction=false
+run_model_predict=true
 process_results=true
-DATASET_PREDICT_ID="ET096_mutagenesis_2025-09-01" # 
-DATASET_TRAIN_ID="ET096_mutagenesis_2025-09-01" # 
+NUM_BATCHES=32
+DATASET_PREDICT_ID="ET096-A171F_combis_7mut" # 
+DATASET_TRAIN_ID="ET096_mutagenesis_2025-09-01_wPurified" # 
 PDB_ID="ET096"
 TARGET_SEQ="MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL"
 CV_SCHEME="fold_random_5" # "fold_random_5,fold_modulo_5,fold_contiguous_5"
@@ -100,15 +101,15 @@ if [ "$run_feature_extraction" = true ]; then
 else echo "Skip feature extraction."
 fi
 
-if [ "$run_model_eval" = true ]; then
+if [ "$run_model_predict" = true ]; then
     
-    # -------- STEP 5: Run KERMUT Model Training --------
-    echo "=== [START] Running KERMUT model training and cross-validation ==="    
+    # -------- STEP 5: Run KERMUT Model Prediction --------
+    echo "=== [START] Running KERMUT model prediction ==="    
     for i in "${!target_cols[@]}"; do
 	TARGET_COL=${target_cols[i]}
 	TARGET_COL_TAG=${target_col_tags[i]}
     	echo "Target col: $TARGET_COL, Target col tag: $TARGET_COL_TAG"
-    	python predict.py --multirun \
+    	python predict_TEST.py --multirun \
         	dataset=single \
         	single.use_id=true \
         	single.id=$DATASET_PREDICT_ID \
@@ -117,6 +118,7 @@ if [ "$run_model_eval" = true ]; then
         	single.target_seq=$TARGET_SEQ \
     		data.target_col=$TARGET_COL \
         	data.target_col_tag=$TARGET_COL_TAG \
+		data.num_batches=$NUM_BATCHES \
     		cv_scheme=$CV_SCHEME \
         	kernel=kermut
     done

@@ -22,3 +22,4 @@ standardize: true
 sequence_col: sequence
 target_col: null
 target_col_tag: null
+num_batches: null

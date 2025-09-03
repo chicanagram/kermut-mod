@@ -54,7 +54,6 @@ def _load_embeddings(cfg: DictConfig, df: pd.DataFrame, DMS_id: str) -> Union[to
         embeddings = embeddings.mean(dim=1)
 
     # Keep entries that are in the dataset
-    print('len(mutants):', len(mutants))
     keep = [x in df["mutations"].tolist() for x in mutants]
     embeddings = embeddings[keep]
     mutants = np.array(mutants)[keep]
@@ -69,7 +68,7 @@ def _tokenize_data(cfg: DictConfig, df: pd.DataFrame) -> torch.Tensor:
         return None
 
     tokenizer = Tokenizer()
-    x_toks = tokenizer(df[cfg.data.sequence_col])
+    x_toks = tokenizer(df[cfg.data.sequence_col].astype(str).tolist())
     return x_toks
 
 
@@ -96,6 +95,44 @@ def prepare_GP_inputs_mod(
             x_zero_shot = x_zero_shot.cuda()
         if x_embedding is not None:
             x_embedding = x_embedding.cuda()
-        y = y.cuda()
+        if y is not None:
+            y = y.cuda()
 
     return df, y, x_toks, x_embedding, x_zero_shot
+
+
+def prepare_GP_inputs_mod_batched(
+        cfg: DictConfig,
+        DMS_id: str,
+        num_batches: int,
+        batch_idx: int
+) -> Tuple[pd.DataFrame, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+
+    # get dataframe
+    df = pd.read_csv(Path(cfg.data.paths.DMS_input_folder) / f"{DMS_id}.csv")
+    n = len(df)
+    batch_size = int(np.ceil(n/num_batches))
+    start_idx = batch_idx*batch_size
+    end_idx = min((batch_idx+1)*batch_size, n)
+
+    # get df_batch
+    df_batch = df.iloc[start_idx:end_idx,:]
+
+    if cfg.data.target_col in df:
+        y_batch = torch.tensor(df_batch[cfg.data.target_col].values, dtype=torch.float32)
+    else:
+        y_batch = None
+    x_toks_batch = _tokenize_data(cfg, df_batch)
+    x_zero_shot_batch = _load_zero_shot(cfg, df_batch, DMS_id)
+    x_embedding_batch = _load_embeddings(cfg, df_batch, DMS_id)
+
+    if cfg.use_gpu and torch.cuda.is_available():
+        x_toks_batch = x_toks_batch.cuda()
+        if x_zero_shot_batch is not None:
+            x_zero_shot_batch = x_zero_shot_batch.cuda()
+        if x_embedding_batch is not None:
+            x_embedding_batch = x_embedding_batch.cuda()
+        if y_batch is not None:
+            y_batch = y_batch.cuda()
+
+    return df_batch, y_batch, x_toks_batch, x_embedding_batch, x_zero_shot_batch
