@@ -109,7 +109,7 @@ if [ "$run_model_predict" = true ]; then
 	TARGET_COL=${target_cols[i]}
 	TARGET_COL_TAG=${target_col_tags[i]}
     	echo "Target col: $TARGET_COL, Target col tag: $TARGET_COL_TAG"
-    	python predict_TEST.py --multirun \
+    	python predict.py --multirun \
         	dataset=single \
         	single.use_id=true \
         	single.id=$DATASET_PREDICT_ID \
