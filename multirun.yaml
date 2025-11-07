@@ -99,19 +99,19 @@ hydra:
     task:
     - dataset=single
     - single.use_id=true
-    - single.id=ET096-A171F_combis_7mut
+    - single.id=ETS83096_sbs_parents_6-1
     - single.id_train=ET096_mutagenesis_2025-09-01_wPurified
     - single.pdb_id=ET096
     - single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL
-    - data.target_col=foldchange_NBD_activity_25C
-    - data.target_col_tag=NBD
-    - data.num_batches=32
+    - data.num_batches=1
     - cv_scheme=fold_random_5
     - kernel=kermut
+    - data.target_col=foldchange_ABTS_activity_25C
+    - data.target_col_tag=ABTS
   job:
-    name: predict_TEST
+    name: predict
     chdir: false
-    override_dirname: cv_scheme=fold_random_5,data.num_batches=32,data.target_col=foldchange_NBD_activity_25C,data.target_col_tag=NBD,dataset=single,kernel=kermut,single.id=ET096-A171F_combis_7mut,single.id_train=ET096_mutagenesis_2025-09-01_wPurified,single.pdb_id=ET096,single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL,single.use_id=true
+    override_dirname: cv_scheme=fold_random_5,data.num_batches=1,data.target_col=foldchange_ABTS_activity_25C,data.target_col_tag=ABTS,dataset=single,kernel=kermut,single.id=ETS83096_sbs_parents_6-1,single.id_train=ET096_mutagenesis_2025-09-01_wPurified,single.pdb_id=ET096,single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL,single.use_id=true
     id: ???
     num: ???
     config_name: supervised
@@ -195,13 +195,13 @@ data:
   test_index: -1
   standardize: true
   sequence_col: sequence
-  target_col: foldchange_NBD_activity_25C
-  target_col_tag: NBD
-  num_batches: 32
+  target_col: foldchange_ABTS_activity_25C
+  target_col_tag: ABTS
+  num_batches: 1
 dataset: single
 cv_scheme: fold_random_5
 single:
-  id: ET096-A171F_combis_7mut
+  id: ETS83096_sbs_parents_6-1
   id_train: ET096_mutagenesis_2025-09-01_wPurified
   pdb_id: ET096
   use_id: true
