@@ -99,11 +99,11 @@ hydra:
     task:
     - dataset=single
     - single.use_id=true
-    - single.id=ETS83096_sbs_parents_6-1
+    - single.id=ETS83096_sbs_children_6-2
     - single.id_train=ET096_mutagenesis_2025-09-01_wPurified
     - single.pdb_id=ET096
     - single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL
-    - data.num_batches=1
+    - data.num_batches=2
     - cv_scheme=fold_random_5
     - kernel=kermut
     - data.target_col=foldchange_ABTS_activity_25C
@@ -111,7 +111,7 @@ hydra:
   job:
     name: predict
     chdir: false
-    override_dirname: cv_scheme=fold_random_5,data.num_batches=1,data.target_col=foldchange_ABTS_activity_25C,data.target_col_tag=ABTS,dataset=single,kernel=kermut,single.id=ETS83096_sbs_parents_6-1,single.id_train=ET096_mutagenesis_2025-09-01_wPurified,single.pdb_id=ET096,single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL,single.use_id=true
+    override_dirname: cv_scheme=fold_random_5,data.num_batches=2,data.target_col=foldchange_ABTS_activity_25C,data.target_col_tag=ABTS,dataset=single,kernel=kermut,single.id=ETS83096_sbs_children_6-2,single.id_train=ET096_mutagenesis_2025-09-01_wPurified,single.pdb_id=ET096,single.target_seq=MKLTLLLSAVFSGAVATLAETSEWSPPESGDARSPCPLLNSLANHGYLPHDGKNITGDVLSKAITTTLNMDDSVSAAFMAALRNSITTAETFSLDELNKHNGIEHDASLSRQDFYFGNVQAFNETIFNQTRSYWTDPVTIDIHQAANARNARIETSKATNPTYNETAVNRASALETAAYILSFGDKVTGSVPKAFVEYFFENERLPFHLGWYKSAESISFADFQNMSTRVSQAGSQSPRAIEL,single.use_id=true
     id: ???
     num: ???
     config_name: supervised
@@ -197,11 +197,11 @@ data:
   sequence_col: sequence
   target_col: foldchange_ABTS_activity_25C
   target_col_tag: ABTS
-  num_batches: 1
+  num_batches: 2
 dataset: single
 cv_scheme: fold_random_5
 single:
-  id: ETS83096_sbs_parents_6-1
+  id: ETS83096_sbs_children_6-2
   id_train: ET096_mutagenesis_2025-09-01_wPurified
   pdb_id: ET096
   use_id: true

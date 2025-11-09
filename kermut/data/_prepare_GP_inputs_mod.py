@@ -82,13 +82,10 @@ def prepare_GP_inputs_mod(
         print('len(y):', len(y))
     else:
         y = None
-    x_toks = _tokenize_data(cfg, df)
-    print('len(x_toks):', len(x_toks)) 
+    x_toks = _tokenize_data(cfg, df) 
     x_zero_shot = _load_zero_shot(cfg, df, DMS_id)
-    print('len(x_zero_shot):', len(x_zero_shot))
     x_embedding = _load_embeddings(cfg, df, DMS_id)
-    print('len(x_embedding):', len(x_embedding))
-
+    
     if cfg.use_gpu and torch.cuda.is_available():
         x_toks = x_toks.cuda()
         if x_zero_shot is not None:
@@ -111,28 +108,34 @@ def prepare_GP_inputs_mod_batched(
     # get dataframe
     df = pd.read_csv(Path(cfg.data.paths.DMS_input_folder) / f"{DMS_id}.csv")
     n = len(df)
-    batch_size = int(np.ceil(n/num_batches))
+    if n==1:
+        batch_size = 1
+    else:
+        batch_size = int(np.ceil(n/num_batches))
     start_idx = batch_idx*batch_size
     end_idx = min((batch_idx+1)*batch_size, n)
+    
+    if start_idx==end_idx: 
+        df_batch, y_batch, x_toks_batch, x_embedding_batch, x_zero_shot_batch = None, None, None, None, None
+    else: 
+        # get df_batch
+        df_batch = df.iloc[start_idx:end_idx,:]
 
-    # get df_batch
-    df_batch = df.iloc[start_idx:end_idx,:]
-
-    if cfg.data.target_col in df:
-        y_batch = torch.tensor(df_batch[cfg.data.target_col].values, dtype=torch.float32)
-    else:
-        y_batch = None
-    x_toks_batch = _tokenize_data(cfg, df_batch)
-    x_zero_shot_batch = _load_zero_shot(cfg, df_batch, DMS_id)
-    x_embedding_batch = _load_embeddings(cfg, df_batch, DMS_id)
-
-    if cfg.use_gpu and torch.cuda.is_available():
-        x_toks_batch = x_toks_batch.cuda()
-        if x_zero_shot_batch is not None:
-            x_zero_shot_batch = x_zero_shot_batch.cuda()
-        if x_embedding_batch is not None:
-            x_embedding_batch = x_embedding_batch.cuda()
-        if y_batch is not None:
-            y_batch = y_batch.cuda()
+        if cfg.data.target_col in df:
+            y_batch = torch.tensor(df_batch[cfg.data.target_col].values, dtype=torch.float32)
+        else:
+            y_batch = None
+        x_toks_batch = _tokenize_data(cfg, df_batch)
+        x_zero_shot_batch = _load_zero_shot(cfg, df_batch, DMS_id)
+        x_embedding_batch = _load_embeddings(cfg, df_batch, DMS_id)
+    
+        if cfg.use_gpu and torch.cuda.is_available():
+            x_toks_batch = x_toks_batch.cuda()
+            if x_zero_shot_batch is not None:
+                x_zero_shot_batch = x_zero_shot_batch.cuda()
+            if x_embedding_batch is not None:
+                x_embedding_batch = x_embedding_batch.cuda()
+            if y_batch is not None:
+                y_batch = y_batch.cuda()
 
     return df_batch, y_batch, x_toks_batch, x_embedding_batch, x_zero_shot_batch

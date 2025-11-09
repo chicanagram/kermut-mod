@@ -19,6 +19,11 @@ from kermut.data import (
 from kermut.gp import instantiate_gp, predict_mod
 
 
+def _debug_shapes(train_feats, test_feats, name):
+    tx, px = train_feats.shape, test_feats.shape
+    print(f"[SHAPE] {name}: train {tx}  |  predict {px}")
+
+
 def _predict_single_dms(cfg: DictConfig, DMS_id_train: str, DMS_id_predict: str, target_seq: str) -> None:
 
     try:
@@ -153,17 +158,25 @@ def _predict_single_dms_batched(cfg: DictConfig, DMS_id_train: str, DMS_id_predi
             for batch_idx in range(num_batches):
                 print(f'Predicting on Batch {batch_idx+1}/{num_batches}...')
                 df_predict_batch, y_predict_batch, x_toks_predict_batch, x_embed_predict_batch, x_zero_shot_predict_batch = prepare_GP_inputs_mod_batched(cfg, DMS_id_predict, num_batches, batch_idx)
-            
+                
+                # if batch data is empty, break out of loop
+                if df_predict_batch is  None:
+                    break
+
+                _debug_shapes(x_toks_train,  x_toks_predict_batch,  "Tokens")
+                _debug_shapes(x_embed_train,  x_embed_predict_batch,  "SequenceEmb")
+                _debug_shapes(x_zero_shot_train, x_zero_shot_predict_batch, "ZeroShot")
+
                 # initialize dataframe to store predictions
                 df_out_batch = df_predict_batch[["mutations"]].copy()
                 if y_predict_batch is not None:
                     df_out_batch['y'] = np.nan
                 for col in ["y_pred", "y_var"]:
                     df_out_batch[f"{col}_{i}"] = np.nan
-                    
+
                 predict_inputs_batch = (x_toks_predict_batch, x_embed_predict_batch, x_zero_shot_predict_batch)
                 predict_targets_batch = y_predict_batch
-                
+
                 # predict on dataset
                 print(f'Obtained test data Batch {batch_idx+1}/{num_batches}. Performing model prediction...')
                 df_out_batch = predict_mod(
@@ -174,7 +187,7 @@ def _predict_single_dms_batched(cfg: DictConfig, DMS_id_train: str, DMS_id_predi
                     test_fold=i,
                     df_out=df_out_batch,
                 )
-                print(f'Obtained test predictions for test data Batch {batch_idx+1}/{num_batches}.')
+                print(f'Obtained test predictions for test data Batch {batch_idx+1}/{num_batches}.', '\n')
                 
                 # append to df_out_fold
                 df_out_fold.append(df_out_batch)

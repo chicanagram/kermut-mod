@@ -46,7 +46,7 @@ def predict_mod(
     """
     gp.eval()
     likelihood.eval()
-
+    
     x_test = tuple([x for x in test_inputs if x is not None])
     if test_targets is not None:
         y_test = test_targets.detach().cpu().numpy()
